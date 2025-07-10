@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "Primera versión del bot de Telegram"
+git branch -M main
+git remote add origin https://github.com/christaic/bot-telegram.git
+git push -u origin main
