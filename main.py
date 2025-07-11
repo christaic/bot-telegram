@@ -8,6 +8,7 @@ from openpyxl.drawing.image import Image as ExcelImage
 from PIL import Image
 from dotenv import load_dotenv
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 TOKEN = os.getenv("7717678907:AAHiDoUQsn1tFueTH-RRows5HGZnpNI8Y50")
