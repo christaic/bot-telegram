@@ -7,6 +7,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image as ExcelImage
 from PIL import Image
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 TOKEN = os.getenv("7717678907:AAHiDoUQsn1tFueTH-RRows5HGZnpNI8Y50")
@@ -138,16 +139,17 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         wb = Workbook()
         ws = wb.active
-        ws.append(["Calle y cuadra", "Latitud", "Longitud", "Foto Antes", "Foto Después", "Foto Etiqueta"])
-        for col in ['D', 'E', 'F']:
+        ws.append(["Fecha y Hora", "Calle y cuadra", "Latitud", "Longitud", "Foto Antes", "Foto Después", "Foto Etiqueta"])
+        for col in ['E', 'F', 'G']:
             ws.column_dimensions[col].width = 20
 
-    ws.append([data["calle"], lat, lon, "", "", ""])
+    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ws.append([fecha_hora, data["calle"], lat, lon, "", "", ""])
     row = ws.max_row
     for i, key in enumerate(["foto_antes", "foto_despues", "foto_etiqueta"]):
         img = ExcelImage(data[key])
         img.width, img.height = 120, 120
-        col = chr(68 + i)
+        col = chr(69 + i)  # E, F, G
         ws.add_image(img, f"{col}{row}")
     ws.row_dimensions[row].height = 90
     wb.save(filename)
