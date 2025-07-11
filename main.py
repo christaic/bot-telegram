@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("📍 Envíame el nombre de la calle y número de cuadra.")
+    await update.message.reply_text("📍 Hola, enviar el nombre de la Calle y Número de Cuadra. Ejemplo: Av. Los Ingenieros - Cuadra 8")
 
 async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     group_id = update.effective_chat.id
