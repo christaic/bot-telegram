@@ -1,13 +1,12 @@
-import os
-import io
-from telegram import update
-from telegram.constants import messageentitytype
-from telegram.ext import applicationbuilder, commandhandler, messagehandler, contexttypes, filters
-from openpyxl import workbook, load_workbook
-from openpyxl.drawing.image import image as excelimage
-from pil import image
-from dotenv import load_dotenv
+import os, io
 from datetime import datetime
+from telegram import Update  # ✅ Correcto
+from telegram.constants import MessageEntityType
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from openpyxl import Workbook, load_workbook
+from openpyxl.drawing.image import Image as ExcelImage
+from PIL import Image
+from dotenv import load_dotenv
 
 load_dotenv()
 token = os.getenv("7717678907:aahidouqsn1tfueth-rrows5hgznpni8y50")
