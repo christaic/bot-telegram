@@ -39,7 +39,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("📍 Hola, enviar el nombre de la Calle.")
+    await update.message.reply_text("📍📝 Hola, enviar nombre de Calle (Formato Av. Ca. Jr. Pje. Prol.)
+    Incluir número de cuadra (Número o Mz.). Ejemplo: Av. Los Ingenieros - Cuadra 8 / Ca. Pio XII - Mz E1 / Ca. S/N - S/N")
 
 async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     group_id = update.effective_chat.id
@@ -51,13 +52,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Usa /start para comenzar el registro.")
+        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
         return
     step = registro_estado[group_id]["step"]
     if step == 0:
         registro_estado[group_id]["data"]["calle"] = update.message.text
         registro_estado[group_id]["step"] = 1
-        await update.message.reply_text("🖼️ Envíame la foto del ANTES.")
+        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del ANTES.
+        🔔👀 Recuerda que la foto se toma en vertical.")
     else:
         await update.message.reply_text("Sigue el flujo.")
 
@@ -66,7 +68,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Usa /start para comenzar el registro.")
+        await update.message.reply_text("❗ Hola WINNER, Usa /start para comenzar con el registro.")
         return
     photo_file = await update.message.photo[-1].get_file()
     photo_bytes = await photo_file.download_as_bytearray()
@@ -77,15 +79,18 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if step == 1:
         registro_estado[group_id]["data"]["foto_antes"] = image_path
         registro_estado[group_id]["step"] = 2
-        await update.message.reply_text("🖼️ Envíame la foto del DESPUÉS.")
+        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del DESPUES.
+        🔔 Recuerda que la foto se toma en vertical y debe ser del mismo angulo que la anterior.")
     elif step == 2:
         registro_estado[group_id]["data"]["foto_despues"] = image_path
         registro_estado[group_id]["step"] = 3
-        await update.message.reply_text("🏷️ Envíame la foto de la ETIQUETA.")
+        await update.message.reply_text("🏷️ Excelente. Enviar foto de la ETIQUETA.
+        🔔 Recuerda que la foto se toma en vertical.")
     elif step == 3:
         registro_estado[group_id]["data"]["foto_etiqueta"] = image_path
         registro_estado[group_id]["step"] = 4
-        await update.message.reply_text("📌 Envíame tu ubicación GPS.")
+        await update.message.reply_text("📌 Genial, por ultimo enviar tu ubicación GPS actual.
+        🔔 Recuerda enviar las coordenadas desde el poste en el cual trabajo")
     else:
         await update.message.reply_text("Ya recibí las fotos. Envíame la ubicación.")
 
@@ -94,7 +99,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Usa /start para comenzar el registro.")
+        await update.message.reply_text("❗ Hola WINNER, Usa /start para comenzar con el registro.")
         return
     data = registro_estado[group_id]["data"]
     lat = update.message.location.latitude
@@ -123,7 +128,8 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ws.row_dimensions[row].height = 90
     wb.save(filename)
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("✅ Registro guardado. Usa /start para otro o /exportar para descargar Excel.")
+    await update.message.reply_text("✅ Registro Exitoso 😊 ¡Sigue así, crack!. Usa /start para continuar.
+    Caso contrario espere a estar proximo a su siguiente punto de trabajo")
 
 async def exportar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_valid_message(update, context):
