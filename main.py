@@ -1,60 +1,59 @@
 import os
 import io
-from telegram import Update
-from telegram.constants import MessageEntityType
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-from openpyxl import Workbook, load_workbook
-from openpyxl.drawing.image import Image as ExcelImage
-from PIL import Image
+from telegram import update
+from telegram.constants import messageentitytype
+from telegram.ext import applicationbuilder, commandhandler, messagehandler, contexttypes, filters
+from openpyxl import workbook, load_workbook
+from openpyxl.drawing.image import image as excelimage
+from pil import image
 from dotenv import load_dotenv
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 load_dotenv()
-TOKEN = os.getenv("7717678907:AAHiDoUQsn1tFueTH-RRows5HGZnpNI8Y50")
+token = os.getenv("7717678907:aahidouqsn1tfueth-rrows5hgznpni8y50")
 
 registro_estado = {}
 
-def is_mentioning_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+def is_mentioning_bot(update: update, context: contexttypes.default_type) -> bool:
     entities = update.message.entities or []
     for entity in entities:
-        if entity.type == MessageEntityType.MENTION:
+        if entity.type == messageentitytype.mention:
             text = update.message.text[entity.offset:entity.offset + entity.length]
             if text.lower() == f"@{context.bot.username.lower()}":
-                return True
-    return False
+                return true
+    return false
 
-def is_reply_to_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+def is_reply_to_bot(update: update, context: contexttypes.default_type) -> bool:
     return (
         update.message.reply_to_message and
         update.message.reply_to_message.from_user.id == context.bot.id
     )
 
-def is_valid_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+def is_valid_message(update: update, context: contexttypes.default_type) -> bool:
     chat_type = update.message.chat.type
     if chat_type == "private":
-        return True
+        return true
     return is_mentioning_bot(update, context) or is_reply_to_bot(update, context)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: update, context: contexttypes.default_type):
     if not is_valid_message(update, context):
         return
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("📍📝 Hola, enviar nombre de Calle (Formato Av. Ca. Jr. Pje. Prol.) Incluir número de cuadra (Número o Mz.). Ejemplo: Av. Los Ingenieros - Cuadra 8 / Ca. Pio XII - Mz E1 / Ca. S/N - S/N.")
+    await update.message.reply_text("📍📝 hola, enviar nombre de calle (formato av. ca. jr. pje. prol.) incluir número de cuadra (número o mz.). ejemplo: av. los ingenieros - cuadra 8 / ca. pio xii - mz e1 / ca. s/n - s/n.")
 
-async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def reiniciar(update: update, context: contexttypes.default_type):
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("🔄 Flujo reiniciado. Usa /start para comenzar de nuevo.")
+    await update.message.reply_text("🔄 flujo reiniciado. usa /start para comenzar de nuevo.")
 
-async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_text(update: update, context: contexttypes.default_type):
     if not is_valid_message(update, context):
         return
 
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
         return
 
     mensaje = update.message.text.strip().lower()
@@ -75,57 +74,57 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if any(frase in mensaje for frase in frases_consulta):
         paso = registro_estado[group_id]["step"]
         mensajes_paso = {
-            0: "📍 Tranquilo 😊. Estás en el PASO 0: Debes enviar el nombre de la calle y cuadra.",
-            1: "🖼️ Tranquilo 😊. Estás en el PASO 1: Debes enviar la foto del ANTES.",
-            2: "🖼️ No pasa nada 😊. Estás en el PASO 2: Debes enviar la foto del DESPUÉS.",
-            3: "🏷️ No pasa nada 😊. Estás en el PASO 3: Debes enviar la foto de la ETIQUETA.",
-            4: "📌 Estoy para ayudarte 😊. Estás en el PASO 4: Debes enviar la ubicación GPS actual.",
+            0: "📍 tranquilo 😊. estás en el paso 0: debes enviar el nombre de la calle y cuadra.",
+            1: "🖼️ tranquilo 😊. estás en el paso 1: debes enviar la foto del antes.",
+            2: "🖼️ no pasa nada 😊. estás en el paso 2: debes enviar la foto del después.",
+            3: "🏷️ no pasa nada 😊. estás en el paso 3: debes enviar la foto de la etiqueta.",
+            4: "📌 estoy para ayudarte 😊. estás en el paso 4: debes enviar la ubicación gps actual.",
         }
-        await update.message.reply_text(mensajes_paso.get(paso, "😕 Paso desconocido. Usa /reiniciar para comenzar de nuevo."))
+        await update.message.reply_text(mensajes_paso.get(paso, "😕 paso desconocido. usa /reiniciar para comenzar de nuevo."))
         return
 
     step = registro_estado[group_id]["step"]
     if step == 0:
         registro_estado[group_id]["data"]["calle"] = update.message.text
         registro_estado[group_id]["step"] = 1
-        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del ANTES. 🔔👀 Recuerda que la foto se toma en vertical.")
+        await update.message.reply_text("🖼️ conforme. ahora enviar la foto del antes. 🔔👀 recuerda que la foto se toma en vertical.")
     else:
-        await update.message.reply_text("Sigue el flujo.")
+        await update.message.reply_text("sigue el flujo.")
 
-async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_photo(update: update, context: contexttypes.default_type):
     if not is_valid_message(update, context):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
         return
     photo_file = await update.message.photo[-1].get_file()
     photo_bytes = await photo_file.download_as_bytearray()
-    image = Image.open(io.BytesIO(photo_bytes))
+    image = image.open(io.bytesio(photo_bytes))
     image_path = f"temp_{group_id}_{registro_estado[group_id]['step']}.jpg"
     image.save(image_path)
     step = registro_estado[group_id]["step"]
     if step == 1:
         registro_estado[group_id]["data"]["foto_antes"] = image_path
         registro_estado[group_id]["step"] = 2
-        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del DESPUES. 🔔 Recuerda que la foto se toma en vertical y debe ser del mismo angulo que la anterior.")
+        await update.message.reply_text("🖼️ conforme. ahora enviar la foto del despues. 🔔 recuerda que la foto se toma en vertical y debe ser del mismo angulo que la anterior.")
     elif step == 2:
         registro_estado[group_id]["data"]["foto_despues"] = image_path
         registro_estado[group_id]["step"] = 3
-        await update.message.reply_text("🏷️ Excelente. Enviar foto de la ETIQUETA. 🔔 Recuerda que la foto se toma en vertical.")
+        await update.message.reply_text("🏷️ excelente. enviar foto de la etiqueta. 🔔 recuerda que la foto se toma en vertical.")
     elif step == 3:
         registro_estado[group_id]["data"]["foto_etiqueta"] = image_path
         registro_estado[group_id]["step"] = 4
-        await update.message.reply_text("📌 Genial, por ultimo enviar tu ubicación GPS actual. 🔔 Recuerda enviar las coordenadas desde el poste en el cual trabajo")
+        await update.message.reply_text("📌 genial, por ultimo enviar tu ubicación gps actual. 🔔 recuerda enviar las coordenadas desde el poste en el cual trabajo")
     else:
-        await update.message.reply_text("Ya recibí las fotos. Envíame la ubicación.")
+        await update.message.reply_text("ya recibí las fotos. envíame tu ubicación GPS actual porfavor.")
 
-async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_location(update: update, context: contexttypes.default_type):
     if not is_valid_message(update, context):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
         return
     data = registro_estado[group_id]["data"]
     lat = update.message.location.latitude
@@ -133,46 +132,50 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data["lat"] = lat
     data["lon"] = lon
 
-    filename = f"grupo_{group_id}.xlsx"
+    fecha_actual = datetime.now().strftime("%y-%m-%d")
+    filename = f"grupo_{group_id}_{fecha_actual}.xlsx"
     if os.path.exists(filename):
         wb = load_workbook(filename)
         ws = wb.active
     else:
-        wb = Workbook()
+        wb = workbook()
         ws = wb.active
-        ws.append(["Fecha y Hora", "Calle y cuadra", "Latitud", "Longitud", "Foto Antes", "Foto Después", "Foto Etiqueta"])
-        for col in ['E', 'F', 'G']:
+        ws.append(["fecha y hora", "calle y cuadra", "latitud", "longitud", "foto antes", "foto después", "foto etiqueta"])
+        for col in ['e', 'f', 'g']:
             ws.column_dimensions[col].width = 20
 
-    fecha_hora = datetime.now(ZoneInfo("America/Lima")).strftime("%Y-%m-%d %H:%M:%S")
-    ws.append([fecha_hora, data["calle"], lat, lon, "", "", ""])
+    ws.append([data["calle"], lat, lon, "", "", ""])
     row = ws.max_row
     for i, key in enumerate(["foto_antes", "foto_despues", "foto_etiqueta"]):
-        img = ExcelImage(data[key])
+        img = excelimage(data[key])
         img.width, img.height = 120, 120
-        col = chr(69 + i)  # E, F, G
+        col = chr(68 + i)
         ws.add_image(img, f"{col}{row}")
+
     ws.row_dimensions[row].height = 90
     wb.save(filename)
-    registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("✅ Registro Exitoso 😊 ¡Sigue así, crack!. Usa /start para continuar. Caso contrario espere a estar proximo a su siguiente punto de trabajo.")
 
-async def exportar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    registro_estado[group_id] = {"step": 0, "data": {}}
+    await update.message.reply_text("✅ registro exitoso 😊 ¡sigue así, crack!. usa /start para continuar. caso contrario espere a estar proximo a su siguiente punto de trabajo.")
+
+async def exportar(update: update, context: contexttypes.default_type):
     if not is_valid_message(update, context):
         return
     group_id = update.effective_chat.id
-    filename = f"grupo_{group_id}.xlsx"
+    fecha_actual = datetime.now().strftime("%y-%m-%d")
+    filename = f"grupo_{group_id}_{fecha_actual}.xlsx"
+
     if os.path.exists(filename):
         await update.message.reply_document(open(filename, "rb"))
     else:
-        await update.message.reply_text("❌ No se encontró archivo para este grupo.")
+        await update.message.reply_text("❌ No se encontró archivo para este grupo en el día de hoy.")
 
-# Construcción y registro de comandos
-app = ApplicationBuilder().token("7717678907:AAHiDoUQsn1tFueTH-RRows5HGZnpNI8Y50").build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("reiniciar", reiniciar))
-app.add_handler(CommandHandler("exportar", exportar))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
-app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-app.add_handler(MessageHandler(filters.LOCATION, handle_location))
+# construcción y registro de comandos
+app = applicationbuilder().token("7717678907:aahidouqsn1tfueth-rrows5hgznpni8y50").build()
+app.add_handler(commandhandler("start", start))
+app.add_handler(commandhandler("reiniciar", reiniciar))
+app.add_handler(commandhandler("exportar", exportar))
+app.add_handler(messagehandler(filters.text & ~filters.command, handle_text))
+app.add_handler(messagehandler(filters.photo, handle_photo))
+app.add_handler(messagehandler(filters.location, handle_location))
 app.run_polling()
