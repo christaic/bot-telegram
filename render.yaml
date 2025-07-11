@@ -1,5 +1,0 @@
-services:
-  - type: web
-    name: telegram-bot
-    env: docker
-    dockerfilePath: Dockerfile
