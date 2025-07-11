@@ -143,7 +143,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for col in ['E', 'F', 'G']:
             ws.column_dimensions[col].width = 20
 
-    fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    fecha_hora = datetime.now(ZoneInfo("America/Lima")).strftime("%Y-%m-%d %H:%M:%S")
     ws.append([fecha_hora, data["calle"], lat, lon, "", "", ""])
     row = ws.max_row
     for i, key in enumerate(["foto_antes", "foto_despues", "foto_etiqueta"]):
