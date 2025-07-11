@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("📍📝 hola, enviar nombre de calle y número de cuadra. Ejemplo: av. los ingenieros - cuadra 8")
+    await update.message.reply_text("📍📝 hola, enviar nombre de calle y número de cuadra. ejemplo: av. los ingenieros - cuadra 8")
 
 async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     group_id = update.effective_chat.id
@@ -51,14 +51,16 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ Usa /start para comenzar con el registro.")
         return
-
     mensaje = update.message.text.strip().lower()
     frases_consulta = [
         f"@{context.bot.username.lower()}",
-        "¿en qué paso estoy?", "en qué paso estoy", "donde estoy", "dónde estoy",
-        "me perdí", "me perdi", "paso actual", "sigo perdido", "bot?", "bot"
+        "¿en qué paso estoy?", "en qué paso estoy",
+        "donde estoy", "dónde estoy",
+        "me perdí", "me perdi",
+        "paso actual", "sigo perdido",
+        "bot?", "bot"
     ]
     if any(frase in mensaje for frase in frases_consulta):
         paso = registro_estado[group_id]["step"]
@@ -71,7 +73,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         await update.message.reply_text(mensajes_paso.get(paso, "😕 paso desconocido. usa /reiniciar y comencemos de nuevo"))
         return
-
     step = registro_estado[group_id]["step"]
     if step == 0:
         registro_estado[group_id]["data"]["calle"] = update.message.text
@@ -85,7 +86,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ Usa /start para comenzar con el registro.")
         return
     photo_file = await update.message.photo[-1].get_file()
     photo_bytes = await photo_file.download_as_bytearray()
@@ -93,7 +94,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     image_path = f"temp_{group_id}_{registro_estado[group_id]['step']}.jpg"
     image.save(image_path)
     step = registro_estado[group_id]["step"]
-     if step == 1:
+    if step == 1:
         registro_estado[group_id]["data"]["foto_antes"] = image_path
         registro_estado[group_id]["step"] = 2
         await update.message.reply_text("🖼️ conforme. ahora enviar la foto del despues. 🔔 recuerda que la foto se toma en vertical y debe ser del mismo angulo que la anterior.")
@@ -113,12 +114,14 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ hola, usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ Usa /start para comenzar con el registro.")
         return
     data = registro_estado[group_id]["data"]
-    data["lat"] = update.message.location.latitude
-    data["lon"] = update.message.location.longitude
-    fecha_actual = datetime.now().strftime("%y-%m-%d")
+    lat = update.message.location.latitude
+    lon = update.message.location.longitude
+    data["lat"] = lat
+    data["lon"] = lon
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
     filename = f"grupo_{group_id}_{fecha_actual}.xlsx"
     if os.path.exists(filename):
         wb = load_workbook(filename)
@@ -126,10 +129,10 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         wb = Workbook()
         ws = wb.active
-        ws.append(["Fecha", "Calle y cuadra", "Latitud", "Longitud", "Foto Antes", "Foto Después", "Foto Etiqueta"])
+        ws.append(["Fecha y hora", "Calle y cuadra", "Latitud", "Longitud", "Foto Antes", "Foto Después", "Foto Etiqueta"])
         for col in ['E', 'F', 'G']:
             ws.column_dimensions[col].width = 20
-    ws.append([fecha_actual, data["calle"], data["lat"], data["lon"], "", "", ""])
+    ws.append([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data["calle"], lat, lon, "", "", ""])
     row = ws.max_row
     for i, key in enumerate(["foto_antes", "foto_despues", "foto_etiqueta"]):
         img = ExcelImage(data[key])
@@ -139,25 +142,24 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ws.row_dimensions[row].height = 90
     wb.save(filename)
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("✅✅Registro guardado correctamente. ¡Buen trabajo, crack! 😊✅")
+    await update.message.reply_text("✅ Registro guardado. Usa /start para registrar otro punto.")
 
 async def exportar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_valid_message(update, context):
         return
     group_id = update.effective_chat.id
-    fecha_actual = datetime.now().strftime("%y-%m-%d")
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
     filename = f"grupo_{group_id}_{fecha_actual}.xlsx"
     if os.path.exists(filename):
         await update.message.reply_document(open(filename, "rb"))
     else:
-        await update.message.reply_text("❌ No se encontró archivo para este grupo el día de hoy.")
+        await update.message.reply_text("❌ No se encontró archivo para este grupo hoy.")
 
-# ▶️ Lanzar la app
-app = applicationbuilder().token("7717678907:aahidouqsn1tfueth-rrows5hgznpni8y50").build()
-app.add_handler(commandhandler("start", start))
-app.add_handler(commandhandler("reiniciar", reiniciar))
-app.add_handler(commandhandler("exportar", exportar))
-app.add_handler(messagehandler(filters.text & ~filters.command, handle_text))
-app.add_handler(messagehandler(filters.photo, handle_photo))
-app.add_handler(messagehandler(filters.location, handle_location))
+app = ApplicationBuilder().token(token).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("reiniciar", reiniciar))
+app.add_handler(CommandHandler("exportar", exportar))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+app.add_handler(MessageHandler(filters.LOCATION, handle_location))
 app.run_polling()
