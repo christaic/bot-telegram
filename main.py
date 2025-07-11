@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("📍📝 Hola, enviar nombre de Calle (Formato Av. Ca. Jr. Pje. Prol.) Incluir número de cuadra (Número o Mz.). Ejemplo: Av. Los Ingenieros - Cuadra 8 / Ca. Pio XII - Mz E1 / Ca. S/N - S/N")
+    await update.message.reply_text("📍📝 Hola, enviar nombre de Calle (Formato Av. Ca. Jr. Pje. Prol.) Incluir número de cuadra (Número o Mz.). Ejemplo: Av. Los Ingenieros - Cuadra 8 / Ca. Pio XII - Mz E1 / Ca. S/N - S/N.")
 
 async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     group_id = update.effective_chat.id
@@ -57,8 +57,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if step == 0:
         registro_estado[group_id]["data"]["calle"] = update.message.text
         registro_estado[group_id]["step"] = 1
-        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del ANTES.
-        🔔👀 Recuerda que la foto se toma en vertical.")
+        await update.message.reply_text("🖼️ Conforme. Ahora enviar la foto del ANTES. 🔔👀 Recuerda que la foto se toma en vertical.")
     else:
         await update.message.reply_text("Sigue el flujo.")
 
@@ -124,7 +123,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ws.row_dimensions[row].height = 90
     wb.save(filename)
     registro_estado[group_id] = {"step": 0, "data": {}}
-    await update.message.reply_text("✅ Registro Exitoso 😊 ¡Sigue así, crack!. Usa /start para continuar. Caso contrario espere a estar proximo a su siguiente punto de trabajo")
+    await update.message.reply_text("✅ Registro Exitoso 😊 ¡Sigue así, crack!. Usa /start para continuar. Caso contrario espere a estar proximo a su siguiente punto de trabajo.")
 
 async def exportar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_valid_message(update, context):
