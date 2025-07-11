@@ -49,10 +49,39 @@ async def reiniciar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_valid_message(update, context):
         return
+
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
         await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
         return
+
+    mensaje = update.message.text.strip().lower()
+    frases_consulta = [
+        f"@{context.bot.username.lower()}",
+        "¿en qué paso estoy?",
+        "en qué paso estoy",
+        "donde estoy",
+        "dónde estoy",
+        "me perdí",
+        "me perdi",
+        "paso actual",
+        "sigo perdido",
+        "bot?",
+        "bot",
+    ]
+
+    if any(frase in mensaje for frase in frases_consulta):
+        paso = registro_estado[group_id]["step"]
+        mensajes_paso = {
+            0: "📍 Tranquilo 😊. Estás en el PASO 0: Debes enviar el nombre de la calle y cuadra.",
+            1: "🖼️ Tranquilo 😊. Estás en el PASO 1: Debes enviar la foto del ANTES.",
+            2: "🖼️ No pasa nada 😊. Estás en el PASO 2: Debes enviar la foto del DESPUÉS.",
+            3: "🏷️ No pasa nada 😊. Estás en el PASO 3: Debes enviar la foto de la ETIQUETA.",
+            4: "📌 Estoy para ayudarte 😊. Estás en el PASO 4: Debes enviar la ubicación GPS actual.",
+        }
+        await update.message.reply_text(mensajes_paso.get(paso, "😕 Paso desconocido. Usa /reiniciar para comenzar de nuevo."))
+        return
+
     step = registro_estado[group_id]["step"]
     if step == 0:
         registro_estado[group_id]["data"]["calle"] = update.message.text
@@ -66,7 +95,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Hola WINNER, Usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
         return
     photo_file = await update.message.photo[-1].get_file()
     photo_bytes = await photo_file.download_as_bytearray()
@@ -94,7 +123,7 @@ async def handle_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     group_id = update.effective_chat.id
     if group_id not in registro_estado:
-        await update.message.reply_text("❗ Hola WINNER, Usa /start para comenzar con el registro.")
+        await update.message.reply_text("❗ Hola, Usa /start para comenzar con el registro.")
         return
     data = registro_estado[group_id]["data"]
     lat = update.message.location.latitude
