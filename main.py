@@ -155,7 +155,7 @@ async def exportar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ No se encontró archivo para este grupo hoy.")
 
-app = ApplicationBuilder().token(token).build()
+app = ApplicationBuilder().token(7717678907:aahidouqsn1tfueth-rrows5hgznpni8y50).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("reiniciar", reiniciar))
 app.add_handler(CommandHandler("exportar", exportar))
