@@ -4,11 +4,9 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
-# 🔁 Reemplaza esto con el ID real de tu carpeta compartida en Google Drive
-FOLDER_ID = "11b0Vb8YEaiMCmSAQ9TQiWWytx0s9t326"
+FOLDER_ID = "11b0Vb8YEaiMCmSAQ9TQiWWytx0s9t326"  # Carpeta compartida contigo
 
 def subir_archivo_a_drive():
-    # Credenciales desde variable de entorno
     cred_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
     if not cred_json:
         print("❌ Variable de entorno GOOGLE_CREDENTIALS_JSON no encontrada")
@@ -22,13 +20,13 @@ def subir_archivo_a_drive():
     
     service = build('drive', 'v3', credentials=creds)
 
-    # Crear un archivo local temporal
+    # Crear archivo local temporal
     with open("archivo_prueba.txt", "w") as f:
-        f.write("¡Hola desde Render!")
+        f.write("¡Hola desde Render con movimiento!")
 
     file_metadata = {
-        'name': 'archivo_prueba.txt',
-        'parents': [FOLDER_ID]  # 👈 Aquí especificamos la carpeta destino
+        'name': 'archivo_prueba.txt'
+        # No usar 'parents' aquí
     }
     media = MediaFileUpload('archivo_prueba.txt', mimetype='text/plain')
 
@@ -38,7 +36,17 @@ def subir_archivo_a_drive():
         fields='id'
     ).execute()
 
-    print(f"✅ Archivo subido con ID: {archivo.get('id')}")
+    print(f"✅ Archivo creado con ID: {archivo.get('id')}")
+
+    # 🔁 Mover el archivo a la carpeta compartida
+    service.files().update(
+        fileId=archivo.get('id'),
+        addParents=FOLDER_ID,
+        removeParents='root',  # quita de la raíz
+        fields='id, parents'
+    ).execute()
+
+    print(f"📁 Archivo movido a carpeta compartida correctamente.")
 
 if __name__ == "__main__":
     subir_archivo_a_drive()
